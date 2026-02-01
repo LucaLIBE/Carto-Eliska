@@ -7,17 +7,18 @@ export function addGeojson(data, config, countriesData, color) {
               color: config.borderColor,
               weight: config.weight,
               fillColor: isCountryInList? color : config.fillColor,
-              fillOpacity: config.fillOpacity
+              fillOpacity: isCountryInList? config.fillOpacity : 0
             }; 
           },
           onEachFeature: function (feature, layer) {
             layer.on('click', function(e){
+                L.DomEvent.stopPropagation(e.originalEvent);
                 if (countriesData.includes(feature.properties.CNTR_ID)) {
                     layer.setStyle({
                     color: config.borderColor,
                     weight: config.weight,
                     fillColor: config.fillColor,
-                    fillOpacity: config.fillOpacity
+                    fillOpacity: 0
                     });
                 countriesDataNew = removeItem(countriesDataNew, feature.properties.CNTR_ID)
                 }
