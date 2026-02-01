@@ -13,7 +13,6 @@ export function addGeojson(data, config, countriesData, color) {
           onEachFeature: function (feature, layer) {
             layer.on('click', function(e){
                 if (countriesData.includes(feature.properties.CNTR_ID)) {
-                    console.log('oh')
                     layer.setStyle({
                     color: config.borderColor,
                     weight: config.weight,
@@ -23,7 +22,6 @@ export function addGeojson(data, config, countriesData, color) {
                 countriesDataNew = removeItem(countriesDataNew, feature.properties.CNTR_ID)
                 }
                 else {
-                    console.log('wow')
                     layer.setStyle({
                         color: config.borderColor,
                         weight: config.weight,

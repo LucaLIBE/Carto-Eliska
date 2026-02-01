@@ -13,6 +13,7 @@ const baseMaps = {
 };
 
 const memoriesLayer = L.layerGroup();
+const countriesLayer = L.layerGroup();
 
 L.marker([48.8566, 2.3522])
     .bindPopup('<strong>Souvenir</strong><br>À Paris.')
@@ -42,7 +43,9 @@ fetch('data/countries.json')
   })
 
 const layersControl = L.control.layers(baseMaps, overlays).addTo(map);
-/*
-window.onbeforeunload = function () {
-    return "Do you really want to close?";
-};*/
+
+function onMapClick(e) {
+    console.log("You clicked the map at " + e.latlng);
+}
+map.on('click', onMapClick);
+
