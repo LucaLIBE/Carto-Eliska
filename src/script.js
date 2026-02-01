@@ -93,10 +93,10 @@ Promise.all([
         Object.keys(countriesDataEliska).length, 'pays Eliska'
     );
     addGeojson(dataGeoJson, config, [], colorLuca).addTo(memoriesLayer);
-    const countriesLayerLuca = addGeojson(dataGeoJson, config, countriesDataLuca, colorLuca);
+    const countriesLayerLuca = addGeojson(dataGeoJson, config, countriesDataLuca, colorLuca, 'Luca');
     layersControl.addOverlay(countriesLayerLuca, '<strong>Pays Luca</strong>');
     //Ajouter la layer GeoJSON Eliska
-    const countriesLayerEliska = addGeojson(dataGeoJson, config, countriesDataEliska, colorEliska);
+    const countriesLayerEliska = addGeojson(dataGeoJson, config, countriesDataEliska, colorEliska,' Eliska');
     layersControl.addOverlay(countriesLayerEliska, '<strong>Pays Eliska</strong>');
   })
   .catch(err => console.error('❌ Erreur chargement:', err));
