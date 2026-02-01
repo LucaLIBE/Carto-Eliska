@@ -14,7 +14,21 @@ const baseMaps = {
 };
 
 const memoriesLayer = L.layerGroup();
-const countriesLayer = L.layerGroup();
+
+// CLÉS localStorage uniques
+const STORAGE_LUCA = 'carto_eliska_luca_countries';
+const STORAGE_ELISKA = 'carto_eliska_eliska_countries';
+
+// Fonctions de persistance
+function saveUserData(user, data) {
+    localStorage.setItem(user === 'Luca' ? STORAGE_LUCA : STORAGE_ELISKA, JSON.stringify(data));
+}
+
+function loadUserData(user) {
+    const key = user === 'Luca' ? STORAGE_LUCA : STORAGE_ELISKA;
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : {};
+}
 
 L.marker([48.8716, 2.4459]) //montreuil
   .bindPopup('<strong>Là où j\'ai vécu</strong><br>')
@@ -52,28 +66,45 @@ const overlays = {
   "<strong>Lieux marquants</strong>" : memoriesLayer,
 }
 
-fetch('data/countries.json')
-  .then(response => response.json())
-  .then(countriesData => {
-    //Charger le GeoJSON des pays
-    fetch('data/CNTR_RG_03M_2024_4326.geojson')
-      .then(response => response.json())
-      .then(data => {
-        addGeojson(data, config, [], colorLuca)[0].addTo(memoriesLayer);
-        //Ajouter la layer GeoJSON Luca
-        const [countriesLayerLuca, countriesLucaNew] = addGeojson(data, config, countriesData.countriesLuca, colorLuca);
-        layersControl.addOverlay(countriesLayerLuca, '<strong>Pays Luca</strong>');
+// ✅ CHARGEMENT UNE SEULE FOIS des deux fichiers
+let countriesDataLuca = {};
+let countriesDataEliska = {};
+let geoJsonData = null;
 
-        //Ajouter la layer GeoJSON Eliska
-        const [countriesLayerEliska, countriesEliskaNew] = addGeojson(data, config, countriesData.countriesEliska, colorEliska);
-        layersControl.addOverlay(countriesLayerEliska, '<strong>Pays Eliska</strong>');
-      });
+Promise.all([
+  fetch('data/countries.json', { cache: 'no-store' }),
+  fetch('data/CNTR_RG_03M_2024_4326.geojson', { cache: 'no-store' })
+])
+  .then(([countriesRes, geoJsonRes]) => Promise.all([countriesRes.json(), geoJsonRes.json()]))
+  .then(([dataCountries, dataGeoJson]) => {
+    // Stocke les données globalement (une seule fois !)
+    geoJsonData = dataGeoJson;
+    // Fusionne fichier JSON + localStorage (localStorage prime)
+    countriesDataLuca = { 
+        ...dataCountries.countriesLuca, 
+        ...loadUserData('Luca') 
+    };
+    countriesDataEliska = { 
+        ...dataCountries.countriesEliska, 
+        ...loadUserData('Eliska') 
+    };
+    console.log('✅ Persistance chargée:', 
+        Object.keys(countriesDataLuca).length, 'pays Luca',
+        Object.keys(countriesDataEliska).length, 'pays Eliska'
+    );
+    addGeojson(dataGeoJson, config, [], colorLuca).addTo(memoriesLayer);
+    const countriesLayerLuca = addGeojson(dataGeoJson, config, countriesDataLuca, colorLuca);
+    layersControl.addOverlay(countriesLayerLuca, '<strong>Pays Luca</strong>');
+    //Ajouter la layer GeoJSON Eliska
+    const countriesLayerEliska = addGeojson(dataGeoJson, config, countriesDataEliska, colorEliska);
+    layersControl.addOverlay(countriesLayerEliska, '<strong>Pays Eliska</strong>');
   })
+  .catch(err => console.error('❌ Erreur chargement:', err));
 
 const layersControl = L.control.layers(baseMaps, overlays).addTo(map);
 
 function onMapClick(e) {
     console.log("You clicked the map at " + e.latlng);
+    console.log(countriesDataLuca);
 }
 map.on('click', onMapClick);
-
