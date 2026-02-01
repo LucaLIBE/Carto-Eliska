@@ -1,4 +1,4 @@
-export function addGeojson(data, config, countriesData, color, user = 'Luca') {
+export function addGeojson(data, config, countriesData, color, user) {
     const STORAGE_KEY = user === 'Luca' ? 'carto_eliska_luca_countries' : 'carto_eliska_eliska_countries';
     
     return L.geoJSON(data, {
